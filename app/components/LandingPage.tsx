@@ -55,7 +55,7 @@ export default function LandingPage() {
         {/* CTA Buttons */}
         <div className="flex flex-col gap-4 sm:flex-row">
           <Link 
-            href="/login" 
+            href="/discover" 
             className="group flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 text-lg font-bold text-white transition-all hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.5)]"
           >
             Find My Movie
