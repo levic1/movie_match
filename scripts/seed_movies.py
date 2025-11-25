@@ -61,7 +61,7 @@ def fetch_and_process_movies():
     print("Fetching top movies from TMDB...")
     
     # Fetch 5 pages (100 movies)
-    for page in range(1, 6): 
+    for page in range(1, 12): 
         url = f"https://api.themoviedb.org/3/movie/top_rated?api_key={TMDB_API_KEY}&language=en-US&page={page}"
         response = requests.get(url).json()
         
