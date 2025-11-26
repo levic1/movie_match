@@ -12,37 +12,17 @@ export async function POST(req: Request) {
     const body = await req.json();
     const messages = body.messages || [];
 
-       const systemInstruction = `
-      You are the ultimate Movie Concierge for 'MovieTinder'.
-      
-      YOUR EXPERTISE:
-      - You are an expert on ACTORS (e.g., "What movies is Brad Pitt in?").
-      - You are an expert on DIRECTORS (e.g., "Best Tarantino movies").
-      - You know release dates, genres, and hidden gems.
-      
-      YOUR RULES:
-      1. Keep answers short, punchy, and fun (max 2-3 sentences).
-      2. If a user asks about a specific actor or director, list their top 3 rated movies immediately.
-      3. If the user asks about non-movie topics (coding, cooking, life advice), politely refuse and steer back to cinema.
-      4. Do not use markdown like **bold** or *italics*, just plain text.
-    `;
-
-    // FIX: Changed model name to 'gemini-1.5-flash-latest' to resolve 404 error
+    // FIX: Use the stable, working version
     const model = genAI.getGenerativeModel({ 
-        model: "gemini-2.5-flash-latest", 
-        systemInstruction: systemInstruction
+        model: "gemini-1.5-flash", 
     });
 
-    // --- THE FIX IS HERE ---
-    // 1. Separate the "Current Prompt" (last message) from "History"
     const lastMessage = messages[messages.length - 1]?.content || "Hello";
     
-    // 2. Format History, but FILTER OUT the first message if it's from the AI (Welcome msg)
+    // Filter out the assistant's welcome message
     const history = messages
-      .slice(0, -1) // Take everything EXCEPT the last message
+      .slice(0, -1)
       .filter((m: any, index: number) => {
-        // Gemini crashes if history starts with 'model'. 
-        // So if the very first message (index 0) is 'assistant', we skip it.
         if (index === 0 && m.role === 'assistant') return false;
         return true;
       })
@@ -51,9 +31,20 @@ export async function POST(req: Request) {
           parts: [{ text: m.content }]
       }));
 
-    // 3. Start Chat
     const chat = model.startChat({ history });
-    const result = await chat.sendMessage(lastMessage);
+    
+    // Add System Instruction to the prompt (Since Flash 1.5 supports it in config, 
+    // but putting it here is safer for all model types)
+    const prompt = `
+      SYSTEM: You are a Movie Concierge. 
+      - ONLY talk about movies, actors, directors.
+      - Refuse other topics politely.
+      - Keep answers under 50 words.
+      
+      USER: ${lastMessage}
+    `;
+
+    const result = await chat.sendMessage(prompt);
     const response = result.response.text();
 
     return NextResponse.json({ reply: response });
