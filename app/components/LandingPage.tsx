@@ -14,6 +14,7 @@ import CardStack from './CardStack'
 import StatsModal from './StatsModal'
 import InfoModal from './InfoModal'
 import MoodSelector from './MoodSelector'
+import AIChat from './AIChat'
 
 // --- ANIMATION VARIANTS ---
 const fadeInUp: Variants = {
@@ -215,49 +216,71 @@ export default function LandingPage() {
           <MoodSelector />
       </section>
 
-      {/* --- NEW SECTION: WHY USE MOVIETINDER --- */}
-      <section className="relative py-24 border-t border-white/5 bg-[#080808]/80 z-20 backdrop-blur-sm">
+     {/* --- NEW SECTION: WHY USE MOVIETINDER (With Animation) --- */}
+      <section className="relative py-24 border-t border-white/5 bg-[#080808] z-20">
         <div className="container mx-auto px-6 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-8">
-                <Smile className="h-4 w-4" />
-                <span>Better than scrolling</span>
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-16 text-white">Why use MovieTinder</h2>
+            {/* Title Animation */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+            >
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-8">
+                    <Smile className="h-4 w-4" />
+                    <span>Better than scrolling</span>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-bold mb-16 text-white">Why use MovieTinder</h2>
+            </motion.div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-purple-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
+            {/* Grid Animation (Staggered) */}
+            <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }} // Triggers when 100px into view
+                variants={staggerContainer}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+                {/* Feature 1 */}
+                <motion.div variants={fadeInUp} className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-purple-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
                     <div className="h-14 w-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition-transform"><Zap className="h-7 w-7" /></div>
                     <h3 className="text-xl font-bold mb-3 text-white">Smart AI Matching</h3>
                     <p className="text-gray-400 text-sm leading-relaxed">Automatically finds movies mathematically similar to your specific taste profile using vector embeddings.</p>
-                </div>
-                <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
+                </motion.div>
+                {/* Feature 2 */}
+                <motion.div variants={fadeInUp} className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
                     <div className="h-14 w-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 transition-transform"><BarChart3 className="h-7 w-7" /></div>
                     <h3 className="text-xl font-bold mb-3 text-white">Built-in Analytics</h3>
                     <p className="text-gray-400 text-sm leading-relaxed">Track your swipes, likes, and top genres in real-time with your personal dashboard.</p>
-                </div>
-                <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-green-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
+                </motion.div>
+                {/* Feature 3 */}
+                <motion.div variants={fadeInUp} className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-green-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
                     <div className="h-14 w-14 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-400 mb-6 group-hover:scale-110 transition-transform"><PlayCircle className="h-7 w-7" /></div>
                     <h3 className="text-xl font-bold mb-3 text-white">Instant Trailers</h3>
                     <p className="text-gray-400 text-sm leading-relaxed">Watch high-quality trailers immediately based on your mood without leaving the app.</p>
-                </div>
-                <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-pink-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
+                </motion.div>
+                {/* Feature 4 */}
+                <motion.div variants={fadeInUp} className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-pink-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
                     <div className="h-14 w-14 rounded-2xl bg-pink-500/10 flex items-center justify-center text-pink-400 mb-6 group-hover:scale-110 transition-transform"><Smartphone className="h-7 w-7" /></div>
                     <h3 className="text-xl font-bold mb-3 text-white">Mobile Optimized</h3>
                     <p className="text-gray-400 text-sm leading-relaxed">Designed to feel like a native app on your phone with smooth, intuitive touch gestures.</p>
-                </div>
-                <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-yellow-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
+                </motion.div>
+                {/* Feature 5 */}
+                <motion.div variants={fadeInUp} className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-yellow-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
                     <div className="h-14 w-14 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-400 mb-6 group-hover:scale-110 transition-transform"><Database className="h-7 w-7" /></div>
                     <h3 className="text-xl font-bold mb-3 text-white">TMDB Powered</h3>
                     <p className="text-gray-400 text-sm leading-relaxed">Access metadata from the world's largest and most accurate movie database.</p>
-                </div>
-                <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-gray-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
+                </motion.div>
+                {/* Feature 6 */}
+                <motion.div variants={fadeInUp} className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-gray-500/50 transition-colors flex flex-col items-center text-center group hover:bg-white/10">
                     <div className="h-14 w-14 rounded-2xl bg-gray-500/10 flex items-center justify-center text-gray-400 mb-6 group-hover:scale-110 transition-transform"><Lock className="h-7 w-7" /></div>
                     <h3 className="text-xl font-bold mb-3 text-white">Privacy First</h3>
                     <p className="text-gray-400 text-sm leading-relaxed">No tracking cookies. Open source code you can inspect yourself on GitHub.</p>
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         </div>
       </section>
+      
 
       {/* --- DEVELOPER & SKILLS SECTION --- */}
       <section className="relative py-24 border-t border-white/5 bg-[#0a0a0a]/50 backdrop-blur-sm z-10">
@@ -339,6 +362,7 @@ export default function LandingPage() {
       {selectedMovie && (
         <InfoModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
       )}
+      <AIChat />
     </div>
   )
 }
