@@ -3,17 +3,16 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: Request) {
   try {
-    // 1. Security Check
     const apiKey = process.env.GOOGLE_API_KEY;
     if (!apiKey) {
-        return NextResponse.json({ error: "API Key is missing on the server." }, { status: 500 });
+      return NextResponse.json({ error: "Server Configuration Error: Missing API Key" }, { status: 500 });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const { messages } = await req.json();
+    const body = await req.json();
+    const messages = body.messages || [];
 
-    // 2. CUSTOM INSTRUCTIONS (Updated for Directors/Actors)
-    const systemInstruction = `
+       const systemInstruction = `
       You are the ultimate Movie Concierge for 'MovieTinder'.
       
       YOUR EXPERTISE:
@@ -33,15 +32,25 @@ export async function POST(req: Request) {
         systemInstruction: systemInstruction
     });
 
-    // 3. Format History for Gemini
-    const history = messages.slice(0, -1).map((m: any) => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        parts: [{ text: m.content }]
-    }));
+    // --- THE FIX IS HERE ---
+    // 1. Separate the "Current Prompt" (last message) from "History"
+    const lastMessage = messages[messages.length - 1]?.content || "Hello";
+    
+    // 2. Format History, but FILTER OUT the first message if it's from the AI (Welcome msg)
+    const history = messages
+      .slice(0, -1) // Take everything EXCEPT the last message
+      .filter((m: any, index: number) => {
+        // Gemini crashes if history starts with 'model'. 
+        // So if the very first message (index 0) is 'assistant', we skip it.
+        if (index === 0 && m.role === 'assistant') return false;
+        return true;
+      })
+      .map((m: any) => ({
+          role: m.role === 'user' ? 'user' : 'model',
+          parts: [{ text: m.content }]
+      }));
 
-    const lastMessage = messages[messages.length - 1].content;
-
-    // 4. Generate Response
+    // 3. Start Chat
     const chat = model.startChat({ history });
     const result = await chat.sendMessage(lastMessage);
     const response = result.response.text();
@@ -49,7 +58,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ reply: response });
 
   } catch (error: any) {
-    console.error("Gemini API Error:", error); // CHECK YOUR VS CODE TERMINAL FOR THIS
-    return NextResponse.json({ error: "Failed to connect to AI." }, { status: 500 });
+    console.error("🔥 GOOGLE AI ERROR:", error.message);
+    return NextResponse.json({ 
+        error: "AI Service Error", 
+        details: error.message 
+    }, { status: 500 });
   }
 }

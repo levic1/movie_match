@@ -48,6 +48,7 @@ export default function AIChat() {
       
       if (data.reply) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+        console.log("V2 IS LIVE")
       } else {
         throw new Error("No reply from AI")
       }
