@@ -43,9 +43,11 @@ export async function POST(req: Request) {
     const prompt = `
 SYSTEM:
 You are a Movie Concierge.
-- ONLY talk about movies, actors, directors.
+- ONLY talk about movies, actors, directors,.
 - Refuse other topics politely.
 - Keep answers under 50 words.
+- also provide where to watch movies, the streaming platform, the latest movies viral on social media
+
 
 USER: ${lastMessage}
     `;

@@ -24,3 +24,31 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer utilities {
+  /* Modern Scrollbar Utility */
+  .scrollbar-modern {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #333 transparent; /* Firefox */
+  }
+
+  /* Webkit (Chrome, Edge, Safari) */
+  .scrollbar-modern::-webkit-scrollbar {
+    width: 6px; /* Very thin */
+    height: 6px;
+  }
+
+  .scrollbar-modern::-webkit-scrollbar-track {
+    background: transparent; /* Invisible track */
+  }
+
+  .scrollbar-modern::-webkit-scrollbar-thumb {
+    background-color: #333; /* Dark grey thumb */
+    border-radius: 20px; /* Rounded pill shape */
+  }
+
+  /* Hover effect to make it easier to grab */
+  .scrollbar-modern:hover::-webkit-scrollbar-thumb {
+    background-color: #555; 
+  }
+}
