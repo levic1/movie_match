@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
     // FIX: Changed model name to 'gemini-1.5-flash-latest' to resolve 404 error
     const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash-latest", 
+        model: "gemini-2.5-flash-latest", 
         systemInstruction: systemInstruction
     });
 
