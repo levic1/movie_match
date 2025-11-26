@@ -27,8 +27,9 @@ export async function POST(req: Request) {
       4. Do not use markdown like **bold** or *italics*, just plain text.
     `;
 
+    // FIX: Changed model name to 'gemini-1.5-flash-latest' to resolve 404 error
     const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
+        model: "gemini-1.5-flash-latest", 
         systemInstruction: systemInstruction
     });
 
