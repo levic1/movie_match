@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, Variants } from 'framer-motion'
 import { RefreshCw, Play, Star, Clock, Calendar, ArrowLeft, Smile } from 'lucide-react'
 
-// UPDATED LIST: Removed problematic moods (Gloomy, Angry, Weird, Sleepy, Reflective)
+// --- 1. THE MISSING LIST ---
 const MOODS = [
     { id: 'cheerful', label: '🥰 Cheerful', color: 'from-yellow-400 to-orange-500' },
     { id: 'humorous', label: '😂 Humorous', color: 'from-green-400 to-emerald-500' },
@@ -17,6 +17,20 @@ const MOODS = [
     { id: 'idyllic', label: '🏞️ Idyllic', color: 'from-teal-400 to-cyan-500' },
     { id: 'playful', label: '🥳 Playful', color: 'from-yellow-300 to-green-400' },
 ];
+
+// Animation Variants
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+}
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20, scale: 0.8 },
+  visible: { opacity: 1, y: 0, scale: 1 }
+}
 
 export default function MoodSelector() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
@@ -62,24 +76,26 @@ export default function MoodSelector() {
             {!selectedMood ? (
                 <motion.div 
                     key="grid"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                    variants={containerVariants}
                     className="text-center"
                 >
-                    <div className="mb-12">
+                    <motion.div variants={itemVariants} className="mb-12">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-4">
                             <Smile className="h-4 w-4" />
                             <span>Mood Matcher</span>
                         </div>
                         <h2 className="text-4xl md:text-6xl font-bold mb-4 text-white">How are you feeling?</h2>
                         <p className="text-xl text-gray-400">Select a mood and we'll pick the perfect movie trailer for you.</p>
-                    </div>
+                    </motion.div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                         {MOODS.map((mood) => (
-                            <button
+                            <motion.button
                                 key={mood.id}
+                                variants={itemVariants}
                                 onClick={() => fetchMovieForMood(mood.id)}
                                 className="group relative overflow-hidden rounded-2xl p-[1px] focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl hover:z-10"
                             >
@@ -87,7 +103,7 @@ export default function MoodSelector() {
                                 <span className="relative flex items-center justify-center h-24 w-full bg-[#111] group-hover:bg-[#1a1a1a] transition-colors rounded-2xl px-2 text-lg md:text-xl font-bold text-white">
                                     {mood.label}
                                 </span>
-                            </button>
+                            </motion.button>
                         ))}
                     </div>
                 </motion.div>
@@ -156,15 +172,7 @@ export default function MoodSelector() {
                             </div>
                         </div>
                     ) : (
-                        <div className="p-10 text-center flex flex-col items-center justify-center h-64">
-                            <p className="text-red-400 mb-4">Failed to load movie.</p>
-                            <button 
-                                onClick={() => fetchMovieForMood(selectedMood!)}
-                                className="px-4 py-2 bg-white/10 rounded-full text-sm hover:bg-white/20 transition-colors"
-                            >
-                                Try Again
-                            </button>
-                        </div>
+                        <div className="p-10 text-center text-red-400">Failed to load movie. Try again.</div>
                     )}
                 </motion.div>
             )}
