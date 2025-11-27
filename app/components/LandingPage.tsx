@@ -94,7 +94,7 @@ export default function LandingPage() {
                 <Film className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                MovieTinder
+                MovieMatch
             </span>
           </div>
 
@@ -230,7 +230,7 @@ export default function LandingPage() {
                     <Smile className="h-4 w-4" />
                     <span>Better than scrolling</span>
                 </div>
-                <h2 className="text-3xl md:text-5xl font-bold mb-16 text-white">Why use MovieTinder</h2>
+                <h2 className="text-3xl md:text-5xl font-bold mb-16 text-white">Why use MovieMatch</h2>
             </motion.div>
             
             {/* Grid Animation (Staggered) */}
