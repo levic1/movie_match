@@ -46,7 +46,7 @@ export default function LoginPage() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentFeature((prev) => (prev + 1) % FEATURES.length)
-    }, 5000)
+    }, 15000)
     return () => clearInterval(timer)
   }, [])
 
