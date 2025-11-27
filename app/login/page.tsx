@@ -3,13 +3,12 @@
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { createClient } from '@/lib/supabase/client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react' // Added useMemo
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Zap, PlayCircle, Smartphone, CheckCircle2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// --- FEATURE SLIDES DATA ---
 const FEATURES = [
   {
     id: 1,
@@ -35,7 +34,10 @@ const FEATURES = [
 ]
 
 export default function LoginPage() {
-  const supabase = createClient()
+  // FIX 1: Create Supabase client ONLY ONCE using useState lazy initialization
+  // This prevents the auth widget from resetting every time the carousel updates
+  const [supabase] = useState(() => createClient())
+  
   const router = useRouter()
   const [currentFeature, setCurrentFeature] = useState(0)
   const [isMounted, setIsMounted] = useState(false)
@@ -44,14 +46,12 @@ export default function LoginPage() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentFeature((prev) => (prev + 1) % FEATURES.length)
-    }, 5000) // Change slide every 5 seconds
+    }, 5000)
     return () => clearInterval(timer)
   }, [])
 
-  // Auth Check Logic (FIXED: Empty dependency array)
   useEffect(() => {
     setIsMounted(true)
-
     const checkSession = async () => {
         const { data: { session } } = await supabase.auth.getSession()
         if (session) {
@@ -68,7 +68,40 @@ export default function LoginPage() {
     })
 
     return () => subscription.unsubscribe()
-  }, []) // <--- FIX IS HERE: Empty array ensures this only runs ONCE on mount
+  }, [])
+
+  // FIX 2: Move the Appearance config outside the render cycle using useMemo
+  // This ensures the styling object doesn't get recreated on every render
+  const authAppearance = useMemo(() => ({
+    theme: ThemeSupa,
+    variables: {
+        default: {
+            colors: {
+                brand: '#8b5cf6', // Violet-500
+                brandAccent: '#7c3aed',
+                inputText: '#fff',
+                inputBackground: '#0f0f0f',
+                inputBorder: '#27272a',
+                inputPlaceholder: '#52525b',
+            },
+            radii: {
+                borderRadiusButton: '8px',
+                inputBorderRadius: '8px',
+            },
+            space: {
+                inputPadding: '16px',
+                buttonPadding: '16px',
+            }
+        }
+    },
+    className: {
+        button: '!bg-purple-600 hover:!bg-purple-500 !text-white !font-semibold !transition-all !border-0 !shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:!shadow-[0_0_30px_rgba(139,92,246,0.5)]',
+        input: '!bg-[#0f0f0f] !border-[#27272a] focus:!border-purple-500 focus:!ring-1 focus:!ring-purple-500/50 !transition-all',
+        label: '!text-gray-400 !text-xs !uppercase !font-bold !mb-2',
+        anchor: '!text-gray-400 hover:!text-white !transition-colors !underline !underline-offset-4',
+        divider: '!bg-white/10'
+    }
+  }), [])
 
   if (!isMounted) return null
 
@@ -78,7 +111,6 @@ export default function LoginPage() {
       {/* --- LEFT SIDE: FEATURE SHOWCASE --- */}
       <div className="hidden lg:flex w-1/2 relative bg-[#0a0a0a] overflow-hidden flex-col justify-between p-12 border-r border-white/5">
         
-        {/* Background Image with Transition */}
         <AnimatePresence mode="wait">
             <motion.div 
                 key={currentFeature}
@@ -97,7 +129,6 @@ export default function LoginPage() {
             </motion.div>
         </AnimatePresence>
 
-        {/* Top: Brand & Back Link */}
         <div className="relative z-20 flex justify-between items-center">
             <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
                 MovieTinder
@@ -107,7 +138,6 @@ export default function LoginPage() {
             </Link>
         </div>
 
-        {/* Bottom: Feature Text Carousel */}
         <div className="relative z-20 max-w-lg">
             <AnimatePresence mode="wait">
                 <motion.div
@@ -128,7 +158,6 @@ export default function LoginPage() {
                 </motion.div>
             </AnimatePresence>
 
-            {/* Pagination Dots */}
             <div className="flex gap-2 mt-8">
                 {FEATURES.map((_, index) => (
                     <button
@@ -143,10 +172,9 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* --- RIGHT SIDE: MODERN LOGIN FORM --- */}
+      {/* --- RIGHT SIDE: LOGIN FORM --- */}
       <div className="flex w-full lg:w-1/2 flex-col justify-center items-center px-6 sm:px-12 relative z-20 bg-[#050505]">
         
-        {/* Mobile Back Button */}
         <div className="lg:hidden absolute top-6 left-6">
             <Link href="/" className="flex items-center gap-2 text-gray-400 hover:text-white">
                 <ArrowLeft className="h-5 w-5" />
@@ -160,53 +188,22 @@ export default function LoginPage() {
             className="w-full max-w-md"
         >
             <div className="mb-10 text-center lg:text-left">
-                <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
+                <h1 className="text-3xl font-bold mb-2">Create an account</h1>
                 <p className="text-gray-400">
-                    Sign in to continue your cinematic journey.
+                    Already have an account? <Link href="/login" className="text-purple-400 hover:text-purple-300 underline underline-offset-4">Log in</Link>
                 </p>
             </div>
 
-            {/* Supabase Widget */}
             <div className="auth-widget-container">
                 <Auth
                     supabaseClient={supabase}
-                    appearance={{
-                        theme: ThemeSupa,
-                        variables: {
-                            default: {
-                                colors: {
-                                    brand: '#8b5cf6', // Violet-500
-                                    brandAccent: '#7c3aed',
-                                    inputText: '#fff',
-                                    inputBackground: '#0f0f0f',
-                                    inputBorder: '#27272a', 
-                                    inputPlaceholder: '#52525b',
-                                },
-                                radii: {
-                                    borderRadiusButton: '8px',
-                                    inputBorderRadius: '8px',
-                                },
-                                space: {
-                                    inputPadding: '16px',
-                                    buttonPadding: '16px',
-                                }
-                            }
-                        },
-                        className: {
-                            button: '!bg-purple-600 hover:!bg-purple-500 !text-white !font-semibold !transition-all !border-0 !shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:!shadow-[0_0_30px_rgba(139,92,246,0.5)]',
-                            input: '!bg-[#0f0f0f] !border-[#27272a] focus:!border-purple-500 focus:!ring-1 focus:!ring-purple-500/50 !transition-all',
-                            label: '!text-gray-400 !text-xs !uppercase !font-bold !mb-2',
-                            anchor: '!text-gray-400 hover:!text-white !transition-colors !underline !underline-offset-4',
-                            divider: '!bg-white/10'
-                        }
-                    }}
+                    appearance={authAppearance} // Use the memoized appearance
                     theme="dark"
                     providers={[]} 
                     redirectTo={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`}
                 />
             </div>
 
-            {/* Trust Badges */}
             <div className="mt-12 pt-8 border-t border-white/5 grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 text-sm text-gray-500">
                     <CheckCircle2 className="h-4 w-4 text-green-500" />
