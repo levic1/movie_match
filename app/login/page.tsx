@@ -48,30 +48,34 @@ export default function LoginPage() {
     return () => clearInterval(timer)
   }, [])
 
+  // Auth Check Logic (FIXED: Empty dependency array)
   useEffect(() => {
     setIsMounted(true)
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) router.push('/discover')
-    }
-    checkUser()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') {
-        router.push('/discover')
+    const checkSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+            router.replace('/discover')
+        }
+    }
+    checkSession()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        router.replace('/discover')
         router.refresh()
       }
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase, router])
+  }, []) // <--- FIX IS HERE: Empty array ensures this only runs ONCE on mount
 
   if (!isMounted) return null
 
   return (
     <div className="flex min-h-screen w-full bg-[#050505] text-white overflow-hidden">
       
-      {/* --- LEFT SIDE: FEATURE SHOWCASE (Modern & Animated) --- */}
+      {/* --- LEFT SIDE: FEATURE SHOWCASE --- */}
       <div className="hidden lg:flex w-1/2 relative bg-[#0a0a0a] overflow-hidden flex-col justify-between p-12 border-r border-white/5">
         
         {/* Background Image with Transition */}
@@ -142,7 +146,7 @@ export default function LoginPage() {
       {/* --- RIGHT SIDE: MODERN LOGIN FORM --- */}
       <div className="flex w-full lg:w-1/2 flex-col justify-center items-center px-6 sm:px-12 relative z-20 bg-[#050505]">
         
-        {/* Mobile Back Button (Only visible on small screens) */}
+        {/* Mobile Back Button */}
         <div className="lg:hidden absolute top-6 left-6">
             <Link href="/" className="flex items-center gap-2 text-gray-400 hover:text-white">
                 <ArrowLeft className="h-5 w-5" />
@@ -156,13 +160,13 @@ export default function LoginPage() {
             className="w-full max-w-md"
         >
             <div className="mb-10 text-center lg:text-left">
-                <h1 className="text-3xl font-bold mb-2">Create an account</h1>
+                <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
                 <p className="text-gray-400">
-                    Already have an account? <Link href="/login" className="text-purple-400 hover:text-purple-300 underline underline-offset-4">Log in</Link>
+                    Sign in to continue your cinematic journey.
                 </p>
             </div>
 
-            {/* Supabase Widget with "Clean Modern" Styling */}
+            {/* Supabase Widget */}
             <div className="auth-widget-container">
                 <Auth
                     supabaseClient={supabase}
@@ -175,7 +179,7 @@ export default function LoginPage() {
                                     brandAccent: '#7c3aed',
                                     inputText: '#fff',
                                     inputBackground: '#0f0f0f',
-                                    inputBorder: '#27272a', // Zinc-800
+                                    inputBorder: '#27272a', 
                                     inputPlaceholder: '#52525b',
                                 },
                                 radii: {
@@ -197,7 +201,7 @@ export default function LoginPage() {
                         }
                     }}
                     theme="dark"
-                    providers={[]} // REMOVED SOCIAL LOGIN BUTTONS
+                    providers={[]} 
                     redirectTo={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`}
                 />
             </div>
