@@ -3,12 +3,13 @@
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { createClient } from '@/lib/supabase/client'
-import { useEffect, useState, useMemo } from 'react' // Added useMemo
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Zap, PlayCircle, Smartphone, CheckCircle2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+// --- CONSTANTS (Moved outside so they never cause re-renders) ---
 const FEATURES = [
   {
     id: 1,
@@ -33,46 +34,8 @@ const FEATURES = [
   }
 ]
 
-export default function LoginPage() {
-  // FIX 1: Create Supabase client ONLY ONCE using useState lazy initialization
-  // This prevents the auth widget from resetting every time the carousel updates
-  const [supabase] = useState(() => createClient())
-  
-  const router = useRouter()
-  const [currentFeature, setCurrentFeature] = useState(0)
-  const [isMounted, setIsMounted] = useState(false)
-
-  // Carousel Logic
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentFeature((prev) => (prev + 1) % FEATURES.length)
-    }, 15000)
-    return () => clearInterval(timer)
-  }, [])
-
-  useEffect(() => {
-    setIsMounted(true)
-    const checkSession = async () => {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session) {
-            router.replace('/discover')
-        }
-    }
-    checkSession()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        router.replace('/discover')
-        router.refresh()
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  // FIX 2: Move the Appearance config outside the render cycle using useMemo
-  // This ensures the styling object doesn't get recreated on every render
-  const authAppearance = useMemo(() => ({
+// FIX: Defined outside component to prevent form reset
+const AUTH_APPEARANCE = {
     theme: ThemeSupa,
     variables: {
         default: {
@@ -101,7 +64,41 @@ export default function LoginPage() {
         anchor: '!text-gray-400 hover:!text-white !transition-colors !underline !underline-offset-4',
         divider: '!bg-white/10'
     }
-  }), [])
+}
+
+export default function LoginPage() {
+  // FIX: Initialize Supabase once
+  const [supabase] = useState(() => createClient())
+  
+  const router = useRouter()
+  const [currentFeature, setCurrentFeature] = useState(0)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Carousel Logic
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentFeature((prev) => (prev + 1) % FEATURES.length)
+    }, 15000) // <--- CHANGED TO 15 SECONDS
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    setIsMounted(true)
+    const checkSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) router.replace('/discover')
+    }
+    checkSession()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        router.replace('/discover')
+        router.refresh()
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, []) 
 
   if (!isMounted) return null
 
@@ -188,16 +185,16 @@ export default function LoginPage() {
             className="w-full max-w-md"
         >
             <div className="mb-10 text-center lg:text-left">
-                <h1 className="text-3xl font-bold mb-2">Create an account</h1>
+                <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
                 <p className="text-gray-400">
-                    Already have an account? <Link href="/login" className="text-purple-400 hover:text-purple-300 underline underline-offset-4">Log in</Link>
+                    Sign in to continue your cinematic journey.
                 </p>
             </div>
 
             <div className="auth-widget-container">
                 <Auth
                     supabaseClient={supabase}
-                    appearance={authAppearance} // Use the memoized appearance
+                    appearance={AUTH_APPEARANCE} // Using the external constant
                     theme="dark"
                     providers={[]} 
                     redirectTo={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`}
