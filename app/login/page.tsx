@@ -6,29 +6,47 @@ import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Film, Sparkles } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { ArrowLeft, Zap, PlayCircle, Smartphone, CheckCircle2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
-// 1. VERIFIED POSTER LIST (High Quality)
-const MOVIE_POSTERS = [
-  "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg", // Shawshank
-  "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg", // Godfather
-  "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg", // Dark Knight
-  "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg", // Pulp Fiction
-  "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg", // Fight Club
-  "https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg", // Forrest Gump
-  "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg", // Matrix
-  "https://image.tmdb.org/t/p/w500/6oom5QZlA9JanD89h1bd9W3E60q.jpg", // LOTR
-  "https://image.tmdb.org/t/p/w500/39wmItIWsg5sZMyRUKGnSxQbUgZ.jpg", // Spirited Away
-  "https://image.tmdb.org/t/p/w500/gEU2QniL6E8AHtMY4kRFW8154L.jpg", // Interstellar
-  "https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg", // Parasite
-  "https://image.tmdb.org/t/p/w500/7fn624j5lj3xTmeOfRWmbZVgU6V.jpg"  // Whiplash
+// --- FEATURE SLIDES DATA ---
+const FEATURES = [
+  {
+    id: 1,
+    title: "AI-Powered Matches",
+    desc: "Stop scrolling. Let our vector database find movies that match your exact taste profile.",
+    icon: <Zap className="h-6 w-6 text-purple-400" />,
+    image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1000&auto=format&fit=crop"
+  },
+  {
+    id: 2,
+    title: "Instant Trailers",
+    desc: "Watch high-quality trailers immediately without leaving the app. No more clicking around.",
+    icon: <PlayCircle className="h-6 w-6 text-green-400" />,
+    image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1000&auto=format&fit=crop"
+  },
+  {
+    id: 3,
+    title: "Mobile Optimized",
+    desc: "Swipe, tap, and discover on the go. Designed to feel like a native app on your phone.",
+    icon: <Smartphone className="h-6 w-6 text-pink-400" />,
+    image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=1000&auto=format&fit=crop"
+  }
 ]
 
 export default function LoginPage() {
   const supabase = createClient()
   const router = useRouter()
+  const [currentFeature, setCurrentFeature] = useState(0)
   const [isMounted, setIsMounted] = useState(false)
+
+  // Carousel Logic
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentFeature((prev) => (prev + 1) % FEATURES.length)
+    }, 5000) // Change slide every 5 seconds
+    return () => clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     setIsMounted(true)
@@ -53,35 +71,99 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full bg-[#050505] text-white overflow-hidden">
       
-      {/* --- LEFT SIDE: LOGIN FORM --- */}
-      <div className="flex w-full md:w-1/2 flex-col justify-center px-8 sm:px-16 lg:px-24 relative z-20 bg-[#050505]">
+      {/* --- LEFT SIDE: FEATURE SHOWCASE (Modern & Animated) --- */}
+      <div className="hidden lg:flex w-1/2 relative bg-[#0a0a0a] overflow-hidden flex-col justify-between p-12 border-r border-white/5">
         
-        {/* Back Button */}
-        <Link href="/" className="absolute top-8 left-8 flex items-center gap-2 text-sm text-gray-500 hover:text-white transition-colors group">
-            <div className="p-2 rounded-full bg-white/5 group-hover:bg-white/10 transition-colors">
-                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+        {/* Background Image with Transition */}
+        <AnimatePresence mode="wait">
+            <motion.div 
+                key={currentFeature}
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 0.4, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.5 }}
+                className="absolute inset-0 z-0"
+            >
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent z-10" />
+                <img 
+                    src={FEATURES[currentFeature].image} 
+                    alt="Feature Background" 
+                    className="w-full h-full object-cover grayscale opacity-50"
+                />
+            </motion.div>
+        </AnimatePresence>
+
+        {/* Top: Brand & Back Link */}
+        <div className="relative z-20 flex justify-between items-center">
+            <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                MovieTinder
             </div>
-            <span className="font-medium">Back to Home</span>
-        </Link>
+            <Link href="/" className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-sm font-medium backdrop-blur-md border border-white/5">
+                <ArrowLeft className="h-4 w-4" /> Back to website
+            </Link>
+        </div>
+
+        {/* Bottom: Feature Text Carousel */}
+        <div className="relative z-20 max-w-lg">
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={currentFeature}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/10">
+                            {FEATURES[currentFeature].icon}
+                        </div>
+                        <span className="text-sm font-bold uppercase tracking-wider text-gray-400">Feature Spotlight</span>
+                    </div>
+                    <h2 className="text-4xl font-extrabold mb-4 leading-tight">{FEATURES[currentFeature].title}</h2>
+                    <p className="text-lg text-gray-400 leading-relaxed">{FEATURES[currentFeature].desc}</p>
+                </motion.div>
+            </AnimatePresence>
+
+            {/* Pagination Dots */}
+            <div className="flex gap-2 mt-8">
+                {FEATURES.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => setCurrentFeature(index)}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                            index === currentFeature ? 'w-8 bg-purple-500' : 'w-2 bg-white/20 hover:bg-white/40'
+                        }`}
+                    />
+                ))}
+            </div>
+        </div>
+      </div>
+
+      {/* --- RIGHT SIDE: MODERN LOGIN FORM --- */}
+      <div className="flex w-full lg:w-1/2 flex-col justify-center items-center px-6 sm:px-12 relative z-20 bg-[#050505]">
+        
+        {/* Mobile Back Button (Only visible on small screens) */}
+        <div className="lg:hidden absolute top-6 left-6">
+            <Link href="/" className="flex items-center gap-2 text-gray-400 hover:text-white">
+                <ArrowLeft className="h-5 w-5" />
+            </Link>
+        </div>
 
         <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="w-full max-w-md mx-auto"
+            transition={{ duration: 0.6 }}
+            className="w-full max-w-md"
         >
-            {/* Logo Section */}
-            <div className="mb-10">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold mb-6">
-                    <Sparkles className="h-3 w-3" />
-                    <span>Join 10,000+ Movie Buffs</span>
-                </div>
-                <h1 className="text-4xl font-extrabold tracking-tight mb-2">Welcome back</h1>
-                <p className="text-gray-400 text-lg">Sign in to continue your watch streak.</p>
+            <div className="mb-10 text-center lg:text-left">
+                <h1 className="text-3xl font-bold mb-2">Create an account</h1>
+                <p className="text-gray-400">
+                    Already have an account? <Link href="/login" className="text-purple-400 hover:text-purple-300 underline underline-offset-4">Log in</Link>
+                </p>
             </div>
 
-            {/* --- SUPABASE AUTH WIDGET --- */}
-            <div className="bg-[#0a0a0a] border border-white/10 p-1 rounded-2xl">
+            {/* Supabase Widget with "Clean Modern" Styling */}
+            <div className="auth-widget-container">
                 <Auth
                     supabaseClient={supabase}
                     appearance={{
@@ -89,71 +171,50 @@ export default function LoginPage() {
                         variables: {
                             default: {
                                 colors: {
-                                    brand: '#7c3aed', // Violet
-                                    brandAccent: '#6d28d9',
-                                    inputText: 'white',
-                                    inputBackground: '#121212',
-                                    inputBorder: '#333',
-                                    inputPlaceholder: '#555',
+                                    brand: '#8b5cf6', // Violet-500
+                                    brandAccent: '#7c3aed',
+                                    inputText: '#fff',
+                                    inputBackground: '#0f0f0f',
+                                    inputBorder: '#27272a', // Zinc-800
+                                    inputPlaceholder: '#52525b',
                                 },
                                 radii: {
-                                    borderRadiusButton: '12px',
-                                    inputBorderRadius: '12px',
+                                    borderRadiusButton: '8px',
+                                    inputBorderRadius: '8px',
                                 },
                                 space: {
-                                    inputPadding: '14px',
-                                    buttonPadding: '14px',
+                                    inputPadding: '16px',
+                                    buttonPadding: '16px',
                                 }
                             }
                         },
                         className: {
-                            button: '!bg-white/10 !border-white/10 !text-white hover:!bg-white/20 !font-bold !transition-all !shadow-none hover:!scale-[1.02]',
-                            input: '!bg-[#121212] !border-white/10 focus:!border-purple-500 focus:!ring-1 focus:!ring-purple-500/50 !transition-all',
-                            label: '!text-gray-400 !text-xs !uppercase !tracking-wider !font-bold !mb-1.5',
-                            loader: '!text-purple-500',
-                            anchor: '!text-purple-400 hover:!text-purple-300 !transition-colors',
+                            button: '!bg-purple-600 hover:!bg-purple-500 !text-white !font-semibold !transition-all !border-0 !shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:!shadow-[0_0_30px_rgba(139,92,246,0.5)]',
+                            input: '!bg-[#0f0f0f] !border-[#27272a] focus:!border-purple-500 focus:!ring-1 focus:!ring-purple-500/50 !transition-all',
+                            label: '!text-gray-400 !text-xs !uppercase !font-bold !mb-2',
+                            anchor: '!text-gray-400 hover:!text-white !transition-colors !underline !underline-offset-4',
                             divider: '!bg-white/10'
                         }
                     }}
                     theme="dark"
-                    providers={[]} // FIX: Empty array removes Google/Github buttons
+                    providers={[]} // REMOVED SOCIAL LOGIN BUTTONS
                     redirectTo={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`}
                 />
             </div>
+
+            {/* Trust Badges */}
+            <div className="mt-12 pt-8 border-t border-white/5 grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-3 text-sm text-gray-500">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>Free Forever</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-500">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span>No Credit Card</span>
+                </div>
+            </div>
+
         </motion.div>
-
-        {/* Subtle Background Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none -z-10" />
-      </div>
-
-      {/* --- RIGHT SIDE: ANIMATED POSTER WALL (FIXED) --- */}
-      <div className="hidden md:flex w-1/2 bg-[#020202] relative overflow-hidden items-center justify-center border-l border-white/5">
-        
-        {/* Dark Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505] z-10" />
-        <div className="absolute inset-0 bg-black/40 z-10" />
-
-        {/* Poster Grid */}
-        <div className="grid grid-cols-3 gap-6 rotate-12 scale-110 opacity-60 grayscale-[30%] hover:grayscale-0 hover:opacity-100 transition-all duration-1000 ease-out">
-            {[...MOVIE_POSTERS, ...MOVIE_POSTERS].map((src, i) => (
-                <motion.div 
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1, duration: 0.8 }}
-                    className="w-36 h-56 rounded-xl overflow-hidden relative shadow-2xl border border-white/10 group"
-                >
-                    <img 
-                        src={src} 
-                        alt="Movie Poster" 
-                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                        // FIX: Hide broken images automatically
-                        onError={(e) => e.currentTarget.style.display = 'none'} 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </motion.div>
-            ))}
-        </div>
       </div>
 
     </div>
